@@ -1,11 +1,11 @@
 please DO NOT edit the "safest code" folder directly. just share your code in the file marked with your initials and i review it for testing before adding it to the source code.
 dont worry if there are multiple classes, just copy and paste the classes one by one in that single file with your name on it.
 
-right your first name in all caps in front of the task that you wanna do.
+write your first name in all caps in front of the task that you wanna do.
 
 TO-DO LIST: 
 
-1. Collision detection(very important): avoid no-clipping through he walls
+1. JAY - Collision detection(very important): avoid no-clipping through he walls
 2. CCTV functionality : anyone picking this needs to make a new class to implement the logic. im gonna add a 3d object as a tablet to access the two cameras on the each corner of H shaped Map.
 the user can press e to access them and have the ability to switch between them with A and D and X to exit. 
 3. morphing effect for all portraits like the one in labs by left clicking on the portraits.
