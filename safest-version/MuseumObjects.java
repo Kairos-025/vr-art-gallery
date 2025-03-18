@@ -124,7 +124,7 @@ public class MuseumObjects {
         cameraTransform2.addChild(cameraModel2);
         layoutBG.addChild(cameraTransform2);
 
-        // egyptian_queen.obj
+ /*       // egyptian_queen.obj
         BranchGroup egyptianQueenModel = loadModel("images/egyptian_queen.obj");
         TransformGroup egyptianQueenTransform = createTransformGroup(
             new Vector3f(-9.2f, 0.0f, 6.2f), // Position
@@ -133,7 +133,7 @@ public class MuseumObjects {
             Math.toRadians(-90)
         );
         egyptianQueenTransform.addChild(egyptianQueenModel);
-        layoutBG.addChild(egyptianQueenTransform);
+        layoutBG.addChild(egyptianQueenTransform);   */
 
         // 01.png
         Shape3D texturedSquare01 = createTexturedSquare("images/01.png");
