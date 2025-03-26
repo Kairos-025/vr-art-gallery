@@ -48,16 +48,34 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
     // Room bounds for movement restrictions
     private final double X_BOUND = 96.0;
     private final double Z_BOUND = 46.0;
+    
+    // --- Object Boundaries ---
+    private static final boolean SHOW_POSITION = true;  // toggle position prints
+    private static final boolean SHOW_COLLISIONS = true; // toggle collision prints
+    private final double[][] OBJECT_BOUNDS = {
+        // format: {minX, maxX, minZ, maxZ} for each object
+        {88.0, X_BOUND, 37.0, Z_BOUND},   // right side of dinosaur flower pot
+        {88.0, X_BOUND, -46.0, -39.0},    // left side of dinosaur flower pot
+        {-96.0, -88.0, 38.0, 46.0},       // left side of portrait flower pot
+        {-96.0, -89.0, -46.0, -39.0},     // right side of portrait flower pot
+        {-93.5, -81.5, -27.0, -13.5},     // right side of portrait floating statue
+        {-92.5, -80.0, 12.5, 26.5},       // left side of portrait floating statue
+        {65.0, 94.0, -21.0, 11.3}         // dinosaur
+    };
 
     // --- Dynamic Light Fields ---
     private TransformGroup dynamicLightTG;
     private PointLight dynamicLight;
     
+    // --- SOUND ---
+    private SoundPlayer soundPlayer;
     
     private Transform3D defaultViewTransform = new Transform3D();
     private boolean inCameraView = false;
-
     
+    // --- Wireframe Mode Toggle ---
+    private boolean wireframeMode = false;
+
     /**
      * Helper method to create an Appearance with a tiled texture.
      * PolygonAttributes are set to CULL_NONE so interior surfaces are visible.
@@ -108,12 +126,12 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
                 Primitive.GENERATE_NORMALS | Primitive.GENERATE_TEXTURE_COORDS | Primitive.ENABLE_APPEARANCE_MODIFY, null);
 
         // Apply tiled textures to each face.
-        ((Shape3D) room.getShape(Box.FRONT)).setAppearance(createTiledTextureAppearance("Projects/ImageWall.jpg"));
-        ((Shape3D) room.getShape(Box.BACK)).setAppearance(createTiledTextureAppearance("Projects/ImageWall.jpg"));
-        ((Shape3D) room.getShape(Box.LEFT)).setAppearance(createTiledTextureAppearance("Projects/ImageWall.jpg"));
-        ((Shape3D) room.getShape(Box.RIGHT)).setAppearance(createTiledTextureAppearance("Projects/ImageWall.jpg"));
-        ((Shape3D) room.getShape(Box.TOP)).setAppearance(createTiledTextureAppearance("Projects/ImageCeiling.jpg"));
-        ((Shape3D) room.getShape(Box.BOTTOM)).setAppearance(createTiledTextureAppearance("Projects/ImageFloor.jpg"));
+        ((Shape3D) room.getShape(Box.FRONT)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageWall.jpg"));
+        ((Shape3D) room.getShape(Box.BACK)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageWall.jpg"));
+        ((Shape3D) room.getShape(Box.LEFT)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageWall.jpg"));
+        ((Shape3D) room.getShape(Box.RIGHT)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageWall.jpg"));
+        ((Shape3D) room.getShape(Box.TOP)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageCeiling.jpg"));
+        ((Shape3D) room.getShape(Box.BOTTOM)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageFloor.jpg"));
 
         sceneBG.addChild(room);
         sceneBG.addChild(createStaticLights());
@@ -122,7 +140,6 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         //sceneBG.addChild(ProjectObjects.addWallObjects());
         
         sceneBG.addChild(ProjectObjects.addObjects());
-
 
         // Note: Do not compile sceneBG here if you plan to add more children later.
         sceneBG.compile();
@@ -146,7 +163,7 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         viewTG.setTransform(viewTransform);
     }
     
- // Add this method to your Project class (or another utility class)
+    // Add this method to your Project class (or another utility class)
     private static BranchGroup createStaticLights() {
         BranchGroup lightBG = new BranchGroup();
 
@@ -196,7 +213,6 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         return lightBG;
     }
 
-    
     /**
      * Adds a dynamic point light to the scene that follows the player's (camera's) position.
      * To avoid the RestrictedAccessException, we wrap the dynamic light's TransformGroup inside a BranchGroup.
@@ -234,7 +250,44 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
     }
     
     /**
-     * Constructor: sets up the canvas, scene, viewer, dynamic lighting, and listeners.
+     * Toggle wireframe mode for the entire scene.
+     * Pressing the 'M' key will call this function.
+     */
+    private void toggleWireframeMode() {
+        wireframeMode = !wireframeMode;
+        toggleWireframeModeRecursive(sceneBG, wireframeMode);
+        System.out.println("Wireframe mode: " + (wireframeMode ? "ON" : "OFF"));
+    }
+    
+    /**
+     * Recursively traverse the scene graph and toggle polygon mode on each Shape3D.
+     */
+    private void toggleWireframeModeRecursive(Node node, boolean wireframe) {
+        if (node == null) return;
+        if (node instanceof Shape3D) {
+            Appearance app = ((Shape3D) node).getAppearance();
+            if (app != null) {
+                PolygonAttributes pa = app.getPolygonAttributes();
+                if (pa == null) {
+                    pa = new PolygonAttributes();
+                    app.setPolygonAttributes(pa);
+                }
+                if (wireframe) {
+                    pa.setPolygonMode(PolygonAttributes.POLYGON_LINE);
+                } else {
+                    pa.setPolygonMode(PolygonAttributes.POLYGON_FILL);
+                }
+            }
+        } else if (node instanceof Group) {
+            Group group = (Group) node;
+            for (int i = 0; i < group.numChildren(); i++) {
+                toggleWireframeModeRecursive(group.getChild(i), wireframe);
+            }
+        }
+    }
+    
+    /**
+     * Constructor: sets up the canvas, scene, viewer, dynamic lighting, sound, and listeners.
      * The Canvas3D background color is set using a java.awt.Color.
      */
     public Project() {
@@ -268,6 +321,10 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         // Add the dynamic light to the scene.
         addDynamicLight();
         
+        // adding SOUND
+        soundPlayer = new SoundPlayer();
+        soundPlayer.playMuseumSound();
+        
         movementTimer = new Timer(30, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -286,11 +343,27 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
      * Also updates the dynamic light position.
      */
     private void updateMovement() {
-        if (keysDown.isEmpty())
+        // check if any movement keys are pressed (WASD)
+        boolean isMoving = keysDown.contains(KeyEvent.VK_W) || 
+                          keysDown.contains(KeyEvent.VK_A) ||
+                          keysDown.contains(KeyEvent.VK_S) || 
+                          keysDown.contains(KeyEvent.VK_D);
+
+        // control footstep sounds based on movement
+        if (isMoving) {
+            soundPlayer.startFootsteps();
+        } else {
+            soundPlayer.stopFootsteps();
+        }
+
+        // skip movement calculations if no keys are pressed
+        if (!isMoving) {
             return;
+        }
 
         Vector3d localMove = new Vector3d(0, 0, 0);
 
+        // Calculate movement vectors based on pressed keys
         if (keysDown.contains(KeyEvent.VK_W)) {
             localMove.z -= moveStep;
         }
@@ -304,19 +377,50 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
             localMove.x += moveStep;
         }
 
-        // Rotate movement direction by yaw.
+        // Rotate movement direction by current yaw angle
         Matrix3d yawRot = new Matrix3d();
         yawRot.rotY(yawAngle);
         yawRot.transform(localMove);
 
-        // Apply movement.
+        Vector3d originalPos = new Vector3d(cameraTranslation);
         cameraTranslation.add(localMove);
 
-        // Restrict movement inside the room.
+        // position debug print
+        if (SHOW_POSITION && isMoving) {
+            //System.out.printf("[POS] X: %.2f, Z: %.2f%n", cameraTranslation.x, cameraTranslation.z);
+        }
+        
+        // Restrict movement within room bounds
         cameraTranslation.x = Math.max(-X_BOUND, Math.min(X_BOUND, cameraTranslation.x));
         cameraTranslation.z = Math.max(-Z_BOUND, Math.min(Z_BOUND, cameraTranslation.z));
-        cameraTranslation.y = fixedY; // Keep y fixed.
+        cameraTranslation.y = fixedY; // Maintain constant height
+        
+        // check object collisions
+        boolean collided = false;
+        for (double[] bounds : OBJECT_BOUNDS) {
+            if (cameraTranslation.x >= bounds[0] && 
+                cameraTranslation.x <= bounds[1] && 
+                cameraTranslation.z >= bounds[2] && 
+                cameraTranslation.z <= bounds[3]) {
+                // collision detected
+                collided = true;
+                if (SHOW_COLLISIONS) {
+                    //System.out.printf("[COLLISION] Hit object at X:%.1f-%.1f, Z:%.1f-%.1f%n",
+                     //               bounds[0], bounds[1], bounds[2], bounds[3]);
+                }
+                cameraTranslation.set(originalPos);
+                break;
+            }
+        }
 
+        // wall collision debug
+        if (SHOW_COLLISIONS && !collided && 
+            (Math.abs(cameraTranslation.x) == X_BOUND || 
+             Math.abs(cameraTranslation.z) == Z_BOUND)) {
+            //System.out.println("[COLLISION] Hit wall boundary");
+        }
+
+        // Update view and lighting
         updateViewTransform();
         updateDynamicLight();
     }
@@ -360,16 +464,13 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         viewTG.setTransform(newView);
     }
 
-
-
-
     // Revert to the default first-person view.
     private void revertToFirstPersonView() {
         viewTG.setTransform(defaultViewTransform);
         inCameraView = false;
     }
 
-    // Traverse upward in the scene graph to find a TransformGroup that holds a Transform3D in its user data.
+    // Traverse upward in the scene graph to find a Transform3D in user data.
     private Transform3D findCameraTransform(Node node) {
         while (node != null) {
             if (node instanceof TransformGroup) {
@@ -382,26 +483,110 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         }
         return null;
     }
-
     
-    // MouseListener methods.
+    private TransformGroup findSwitchTG(Node node) {
+        while (node != null) {
+            if (node instanceof TransformGroup) {
+                Object data = ((TransformGroup) node).getUserData();
+                if (data instanceof String) {
+                    String s = (String) data;
+                    if ("switch-off".equals(s) || "switch-on".equals(s)) {
+                        return (TransformGroup) node;
+                    }
+                }
+            }
+            node = node.getParent();
+        }
+        return null;
+    }
+
+ // MouseListener methods.
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (SwingUtilities.isLeftMouseButton(e)) {
-            PickCanvas pickCanvas = new PickCanvas(canvas3D, sceneBG);
-            pickCanvas.setMode(PickTool.GEOMETRY);
-            pickCanvas.setShapeLocation(e);
-            PickResult result = pickCanvas.pickClosest();
-            if (result != null) {
-                Node pickedNode = result.getObject();
-                Transform3D camTransform = findCameraTransform(pickedNode);
-                if (camTransform != null) {
-                    switchToCameraView(camTransform);
+        PickCanvas pickCanvas = new PickCanvas(canvas3D, sceneBG);
+        pickCanvas.setMode(PickTool.GEOMETRY);
+        pickCanvas.setShapeLocation(e);
+        PickResult result = pickCanvas.pickClosest();
+        if (result != null) {
+            Node pickedNode = result.getObject();
+            String controlType = getControlType(pickedNode);
+            if (controlType != null) {
+                // Process the control type as before...
+                if (controlType.equals("man-rotation") && ProjectObjects.manRotationTG != null) {
+                    RotationInterpolator rotator = (RotationInterpolator) ProjectObjects.manRotationTG.getUserData();
+                    Alpha alpha = rotator.getAlpha();
+                    if (alpha.getMode() != 0) {
+                        alpha.setMode(0);
+                    } else {
+                        alpha.setMode(Alpha.INCREASING_ENABLE | Alpha.DECREASING_ENABLE);
+                    }
+                } else if (controlType.equals("man-levitation") && ProjectObjects.manLevitationTG != null) {
+                    ProjectAnimations.Levitation levitator = (ProjectAnimations.Levitation) ProjectObjects.manLevitationTG.getUserData();
+                    levitator.togglePause();
+                } else if (controlType.equals("woman-rotation") && ProjectObjects.womanRotationTG != null) {
+                    RotationInterpolator rotator = (RotationInterpolator) ProjectObjects.womanRotationTG.getUserData();
+                    Alpha alpha = rotator.getAlpha();
+                    if (alpha.getMode() != 0) {
+                        alpha.setMode(0);
+                    } else {
+                        alpha.setMode(Alpha.INCREASING_ENABLE | Alpha.DECREASING_ENABLE);
+                    }
+                } else if (controlType.equals("woman-levitation") && ProjectObjects.womanLevitationTG != null) {
+                    ProjectAnimations.Levitation levitator = (ProjectAnimations.Levitation) ProjectObjects.womanLevitationTG.getUserData();
+                    levitator.togglePause();
                 }
+                return;
+            }
+            
+            // Check if the picked node is a switch:
+            TransformGroup switchTG = findSwitchTG(pickedNode);
+            if (switchTG != null) {
+                // Retrieve current state.
+                String state = (String) switchTG.getUserData();
+                
+                // Get the current transform.
+                Transform3D currentTransform = new Transform3D();
+                switchTG.getTransform(currentTransform);
+                
+                // Create a 180° rotation about Y.
+                Transform3D rotation180 = new Transform3D();
+                rotation180.rotZ(Math.PI);
+                
+                // Multiply the current transform by the new rotation.
+                currentTransform.mul(rotation180);
+                switchTG.setTransform(currentTransform);
+                
+                // Toggle the state flag.
+                if ("switch-off".equals(state)) {
+                    switchTG.setUserData("switch-on");
+                } else {
+                    switchTG.setUserData("switch-off");
+                }
+                // We handled the switch; exit without changing the camera view.
+                return;
+            }
+            
+            // If the picked object is not a switch, check for a camera view change.
+            Transform3D camTransform = findCameraTransform(pickedNode);
+            if (camTransform != null) {
+                switchToCameraView(camTransform);
             }
         }
     }
 
+    private String getControlType(Node node) {
+        while (node != null) {
+            Object data = node.getUserData();
+            if (data instanceof String) {
+                String controlType = (String) data;
+                if (controlType.startsWith("man-") || controlType.startsWith("woman-")) {
+                    return controlType;
+                }
+            }
+            node = node.getParent();
+        }
+        return null;
+    }
     
     private int lastMouseX, lastMouseY;
     
@@ -412,12 +597,12 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
 
         if (SwingUtilities.isRightMouseButton(e)) {
             // Use a picking mechanism to determine which object was clicked.
-        	PickCanvas pickCanvas = new PickCanvas(canvas3D, sceneBG);
-        	pickCanvas.setMode(PickTool.GEOMETRY);
-        	// Increase tolerance (in pixels); try a value like 0.0f (adjust as needed)
-        	pickCanvas.setTolerance(0.0f);
-        	pickCanvas.setShapeLocation(e);
-        	PickResult result = pickCanvas.pickClosest();
+            PickCanvas pickCanvas = new PickCanvas(canvas3D, sceneBG);
+            pickCanvas.setMode(PickTool.GEOMETRY);
+            // Increase tolerance (in pixels); try a value like 0.0f (adjust as needed)
+            pickCanvas.setTolerance(0.0f);
+            pickCanvas.setShapeLocation(e);
+            PickResult result = pickCanvas.pickClosest();
             if (result != null) {
                 Node pickedNode = result.getObject();
                 // Traverse upward to find the BranchGroup that holds our userData (the Alpha).
@@ -439,7 +624,7 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         }
     }
 
-    // Utility method to traverse upward until we find a node that is a BranchGroup with userData.
+    // Utility method to traverse upward until we find a BranchGroup with userData.
     private BranchGroup findMorphGroup(Node node) {
         while (node != null) {
             if (node instanceof BranchGroup && node.getUserData() != null) {
@@ -449,7 +634,6 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         }
         return null;
     }
-
 
     @Override
     public void mouseReleased(MouseEvent e) { }
@@ -492,9 +676,12 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && inCameraView) {
             revertToFirstPersonView();
         }
+        // Toggle wireframe mode with the 'M' key.
+        if (e.getKeyCode() == KeyEvent.VK_M) {
+            toggleWireframeMode();
+        }
         keysDown.add(e.getKeyCode());
     }
-
     
     @Override
     public void keyReleased(KeyEvent e) {
