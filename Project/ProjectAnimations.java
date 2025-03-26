@@ -303,6 +303,8 @@ public class ProjectAnimations {
         );
         rotator.setSchedulingBounds(new BoundingSphere(new Point3d(), 1000.0));
         rotateTG.addChild(rotator);
+        // Store the rotationAlpha for later toggling.
+        rotateTG.setUserData(rotator);
         return rotateTG;
     }
 
@@ -313,8 +315,11 @@ public class ProjectAnimations {
         Levitation levitator = new Levitation(levitateTG, minOffset, maxOffset, cycleTime);
         levitator.setSchedulingBounds(new BoundingSphere(new Point3d(), 1000.0));
         levitateTG.addChild(levitator);
+        // Store the levitation behavior for later toggling.
+        levitateTG.setUserData(levitator);
         return levitateTG;
     }
+
 
     public static class Levitation extends Behavior {
         private TransformGroup tg;
@@ -326,6 +331,8 @@ public class ProjectAnimations {
         private double yMax;
         private int delayCounter = 0;
         private int delayCycles = 15;
+        private boolean paused = false;
+
 
         public Levitation(TransformGroup tg, float minOffset, float maxOffset, long cycleTime) {
             this.tg = tg;
@@ -342,8 +349,16 @@ public class ProjectAnimations {
             wakeupOn(wakeup);
         }
 
+        public void togglePause() {
+            paused = !paused;
+        }
+
         @Override
         public void processStimulus(Iterator<WakeupCriterion> criteria) {
+            if (paused) {
+                wakeupOn(wakeup);
+                return;
+            }
             if (delayCounter > 0) {
                 delayCounter--;
                 wakeupOn(wakeup);
