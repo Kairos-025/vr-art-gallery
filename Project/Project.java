@@ -172,7 +172,6 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         ambient.setInfluencingBounds(new BoundingSphere(new Point3d(0, 0, 0), 1000));
         lightBG.addChild(ambient);
 
-        // Create point lights with attenuation so brightness falls off with distance.
         // Front wall (z = 50) light:
         PointLight frontLight = new PointLight(
                 new Color3f(0.7f, 0.7f, 0.7f),
@@ -406,7 +405,7 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
                 collided = true;
                 if (SHOW_COLLISIONS) {
                     //System.out.printf("[COLLISION] Hit object at X:%.1f-%.1f, Z:%.1f-%.1f%n",
-                     //               bounds[0], bounds[1], bounds[2], bounds[3]);
+                    //               bounds[0], bounds[1], bounds[2], bounds[3]);
                 }
                 cameraTranslation.set(originalPos);
                 break;
@@ -499,6 +498,32 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         }
         return null;
     }
+    
+    private void updateIndicatorColor(TransformGroup indicatorTG, Color3f color) {
+        // Only traverse the children of the indicatorTG
+        for (int i = 0; i < indicatorTG.numChildren(); i++) {
+            Node child = indicatorTG.getChild(i);
+            updateIndicatorColorInNode(child, color);
+        }
+    }
+
+    private void updateIndicatorColorInNode(Node node, Color3f color) {
+        if (node instanceof Shape3D) {
+            Appearance app = ((Shape3D) node).getAppearance();
+            if (app != null) {
+                Material mat = app.getMaterial();
+                if (mat != null) {
+                    mat.setDiffuseColor(color);
+                }
+            }
+        } else if (node instanceof Group) {
+            Group group = (Group) node;
+            for (int i = 0; i < group.numChildren(); i++) {
+                updateIndicatorColorInNode(group.getChild(i), color);
+            }
+        }
+    }
+
 
  // MouseListener methods.
     @Override
@@ -511,14 +536,14 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
             Node pickedNode = result.getObject();
             String controlType = getControlType(pickedNode);
             if (controlType != null) {
-                // Process the control type as before...
+                // Process the control type.
                 if (controlType.equals("man-rotation") && ProjectObjects.manRotationTG != null) {
                     RotationInterpolator rotator = (RotationInterpolator) ProjectObjects.manRotationTG.getUserData();
                     Alpha alpha = rotator.getAlpha();
-                    if (alpha.getMode() != 0) {
-                        alpha.setMode(0);
+                    if (!alpha.isPaused()) {
+                        alpha.pause();
                     } else {
-                        alpha.setMode(Alpha.INCREASING_ENABLE | Alpha.DECREASING_ENABLE);
+                        alpha.resume();
                     }
                 } else if (controlType.equals("man-levitation") && ProjectObjects.manLevitationTG != null) {
                     ProjectAnimations.Levitation levitator = (ProjectAnimations.Levitation) ProjectObjects.manLevitationTG.getUserData();
@@ -526,14 +551,18 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
                 } else if (controlType.equals("woman-rotation") && ProjectObjects.womanRotationTG != null) {
                     RotationInterpolator rotator = (RotationInterpolator) ProjectObjects.womanRotationTG.getUserData();
                     Alpha alpha = rotator.getAlpha();
-                    if (alpha.getMode() != 0) {
-                        alpha.setMode(0);
+                    if (!alpha.isPaused()) {
+                        alpha.pause();
                     } else {
-                        alpha.setMode(Alpha.INCREASING_ENABLE | Alpha.DECREASING_ENABLE);
+                        alpha.resume();
                     }
                 } else if (controlType.equals("woman-levitation") && ProjectObjects.womanLevitationTG != null) {
                     ProjectAnimations.Levitation levitator = (ProjectAnimations.Levitation) ProjectObjects.womanLevitationTG.getUserData();
                     levitator.togglePause();
+                }
+                // New condition: when the control type is "trex-sound", play the T-rex sound.
+                else if (controlType.equals("trex-sound")) {
+                    soundPlayer.playTrexRoar();
                 }
                 return;
             }
@@ -542,7 +571,9 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
             TransformGroup switchTG = findSwitchTG(pickedNode);
             if (switchTG != null) {
                 // Retrieve current state.
-                String state = (String) switchTG.getUserData();
+                String currentState = (String) switchTG.getUserData();
+                String newState = "switch-off".equals(currentState) ? "switch-on" : "switch-off";
+                switchTG.setUserData(newState);
                 
                 // Get the current transform.
                 Transform3D currentTransform = new Transform3D();
@@ -555,14 +586,21 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
                 // Multiply the current transform by the new rotation.
                 currentTransform.mul(rotation180);
                 switchTG.setTransform(currentTransform);
-                
-                // Toggle the state flag.
-                if ("switch-off".equals(state)) {
-                    switchTG.setUserData("switch-on");
-                } else {
-                    switchTG.setUserData("switch-off");
+               
+                // If this switch is our first switch, update its indicator.
+                if (switchTG == ProjectObjects.switch1TG) {
+                    if ("switch-on".equals(newState)) {
+                        updateIndicatorColor(ProjectObjects.indicator1TG, new Color3f(0f, 1f, 0f)); // green
+                    } else {
+                        updateIndicatorColor(ProjectObjects.indicator1TG, new Color3f(1f, 0f, 0f)); // red
+                    }
+                } else if (switchTG == ProjectObjects.switch2TG) {
+                    if ("switch-on".equals(newState)) {
+                        updateIndicatorColor(ProjectObjects.indicator2TG, new Color3f(0f, 1f, 0f)); // green
+                    } else {
+                        updateIndicatorColor(ProjectObjects.indicator2TG, new Color3f(1f, 0f, 0f)); // red
+                    }
                 }
-                // We handled the switch; exit without changing the camera view.
                 return;
             }
             
@@ -574,12 +612,13 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         }
     }
 
+    // Updated getControlType to also check for "trex-sound"
     private String getControlType(Node node) {
         while (node != null) {
             Object data = node.getUserData();
             if (data instanceof String) {
                 String controlType = (String) data;
-                if (controlType.startsWith("man-") || controlType.startsWith("woman-")) {
+                if (controlType.startsWith("man-") || controlType.startsWith("woman-") || controlType.equals("trex-sound")) {
                     return controlType;
                 }
             }
@@ -596,26 +635,20 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         lastMouseY = e.getY();
 
         if (SwingUtilities.isRightMouseButton(e)) {
-            // Use a picking mechanism to determine which object was clicked.
             PickCanvas pickCanvas = new PickCanvas(canvas3D, sceneBG);
             pickCanvas.setMode(PickTool.GEOMETRY);
-            // Increase tolerance (in pixels); try a value like 0.0f (adjust as needed)
             pickCanvas.setTolerance(0.0f);
             pickCanvas.setShapeLocation(e);
             PickResult result = pickCanvas.pickClosest();
             if (result != null) {
                 Node pickedNode = result.getObject();
-                // Traverse upward to find the BranchGroup that holds our userData (the Alpha).
                 BranchGroup morphBG = findMorphGroup(pickedNode);
                 if (morphBG != null) {
                     Alpha alpha = (Alpha) morphBG.getUserData();
                     if (alpha != null) {
-                        // Toggle the mode:
                         if (alpha.getMode() != 0) {
-                            // Pause: set mode to 0. This "freezes" the Alpha at its current phase.
                             alpha.setMode(0);
                         } else {
-                            // Resume: restore mode so it continues from where it stopped.
                             alpha.setMode(Alpha.INCREASING_ENABLE | Alpha.DECREASING_ENABLE);
                         }
                     }
@@ -676,7 +709,6 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && inCameraView) {
             revertToFirstPersonView();
         }
-        // Toggle wireframe mode with the 'M' key.
         if (e.getKeyCode() == KeyEvent.VK_M) {
             toggleWireframeMode();
         }
