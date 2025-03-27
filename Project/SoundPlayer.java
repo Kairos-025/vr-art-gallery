@@ -1,4 +1,4 @@
-package CodesEJ2800;
+package Project;
 
 import javax.sound.sampled.*;
 import java.io.File;
