@@ -11,6 +11,10 @@ public class ProjectObjects {
 	public static TransformGroup manLevitationTG;
 	public static TransformGroup womanRotationTG;
 	public static TransformGroup womanLevitationTG;
+	public static TransformGroup switch1TG;
+	public static TransformGroup switch2TG;
+	public static TransformGroup indicator1TG;
+	public static TransformGroup indicator2TG;
 
 	/**
 	 * Loads a 3D model from an OBJ file using the ObjectFile loader.
@@ -415,37 +419,89 @@ public class ProjectObjects {
 		return bg;
 	}
 
-	public static BranchGroup addSwitchAt(Vector3d pos, double rotationAngle) {
-		BranchGroup bg = new BranchGroup();
-		BranchGroup switchModel = loadModel("ProjectFiles/models/switch.obj");
-		if (switchModel == null) {
-			System.err.println("Failed to load switch model.");
-			return bg;
-		}
-		Appearance switchAppearance = createAppearance("switch");
-		applyAppearance(switchModel, switchAppearance);
-		Transform3D scale = new Transform3D();
-		scale.setScale(1.0f);
+	public static BranchGroup addSwitchAt(Vector3d pos, double rotationAngle, int switchNumber) {
+	    BranchGroup bg = new BranchGroup();
+	    BranchGroup switchModel = loadModel("ProjectFiles/models/switch.obj");
+	    if (switchModel == null) {
+	        System.err.println("Failed to load switch model.");
+	        return bg;
+	    }
+	    Appearance switchAppearance = createAppearance("switch");
+	    applyAppearance(switchModel, switchAppearance);
+	    Transform3D scale = new Transform3D();
+	    scale.setScale(1.0f);
 
-		Transform3D rotate = new Transform3D();
-		rotate.rotY(rotationAngle);
+	    Transform3D rotate = new Transform3D();
+	    rotate.rotY(rotationAngle);
 
-		scale.mul(rotate);
+	    scale.mul(rotate);
 
-		Transform3D translate = new Transform3D();
-		translate.setTranslation(pos);
-		translate.mul(scale);
+	    Transform3D translate = new Transform3D();
+	    translate.setTranslation(pos);
+	    translate.mul(scale);
 
-		TransformGroup tg = new TransformGroup(translate);
-		tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		// Mark the switch with initial state "off"
-		tg.setUserData("switch-off");
+	    TransformGroup tg = new TransformGroup(translate);
+	    tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+	    // Initially, mark the switch as off
+	    tg.setUserData("switch-off");
+	    tg.addChild(switchModel);
 
-		tg.addChild(switchModel);
-		bg.addChild(tg);
-		bg.compile();
-		return bg;
+	    // Store the correct reference based on the switch number
+	    if(switchNumber == 1) {
+	        switch1TG = tg;
+	    } else if(switchNumber == 2) {
+	        switch2TG = tg;
+	    }
+
+	    bg.addChild(tg);
+	    bg.compile();
+	    return bg;
 	}
+
+	
+	public static BranchGroup addIndicatorAt(Vector3d pos, int indicatorNumber) {
+	    BranchGroup bg = new BranchGroup();
+	    BranchGroup indicatorModel = loadModel("ProjectFiles/models/indicator.obj");
+	    if (indicatorModel == null) {
+	        System.err.println("Failed to load indicator model.");
+	        return bg;
+	    }
+	    // Create a fresh Appearance instance for this indicator
+	    Appearance indicatorAppearance = new Appearance();
+	    indicatorAppearance.setCapability(Appearance.ALLOW_MATERIAL_WRITE);
+	    
+	    Material mat = new Material();
+	    mat.setCapability(Material.ALLOW_COMPONENT_WRITE);
+	    // Start with red (off)
+	    mat.setDiffuseColor(new Color3f(1f, 0f, 0f));
+	    indicatorAppearance.setMaterial(mat);
+	    
+	    // Apply the appearance only to the indicator's geometry
+	    applyAppearance(indicatorModel, indicatorAppearance);
+
+	    Transform3D scale = new Transform3D();
+	    scale.setScale(0.25f);
+	    Transform3D translate = new Transform3D();
+	    translate.setTranslation(pos);
+	    translate.mul(scale);
+	    
+	    TransformGroup tg = new TransformGroup(translate);
+	    // Tag the transform group so that later you know this is an indicator
+	    tg.setUserData("indicator" + indicatorNumber);
+	    tg.addChild(indicatorModel);
+
+	    if(indicatorNumber == 1) {
+	        indicator1TG = tg;
+	    } else if(indicatorNumber == 2) {
+	        indicator2TG = tg;
+	    }
+
+	    bg.addChild(tg);
+	    bg.compile();
+	    return bg;
+	}
+
+
 
 	public static BranchGroup addStandAt(Vector3d pos, double rotationAngle) {
 		BranchGroup bg = new BranchGroup();
@@ -469,33 +525,6 @@ public class ProjectObjects {
 		translate.mul(scale);
 		TransformGroup tg = new TransformGroup(translate);
 		tg.addChild(standModel);
-		bg.addChild(tg);
-		bg.compile();
-		return bg;
-	}
-	
-	public static BranchGroup addButtonAt(Vector3d pos, double rotationAngle) {
-		BranchGroup bg = new BranchGroup();
-		BranchGroup buttonModel = loadModel("ProjectFiles/models/button.obj");
-		if (buttonModel == null) {
-			System.err.println("Failed to load button model.");
-			return bg;
-		}
-		//Appearance standAppearance = createAppearance("stand");
-		//applyAppearance(standModel, standAppearance);
-		Transform3D scale = new Transform3D();
-		scale.setScale(0.5f);
-
-		Transform3D rotate = new Transform3D();
-		rotate.rotZ(rotationAngle);
-
-		scale.mul(rotate);
-
-		Transform3D translate = new Transform3D();
-		translate.setTranslation(pos);
-		translate.mul(scale);
-		TransformGroup tg = new TransformGroup(translate);
-		tg.addChild(buttonModel);
 		bg.addChild(tg);
 		bg.compile();
 		return bg;
@@ -582,7 +611,7 @@ public class ProjectObjects {
 		objectsBG.addChild(addTrexAt(new Vector3d(xRight - 20, floorY + 9, zNear + 48)));
 		objectsBG.addChild(addPodiumAt(new Vector3d(xRight - 18, floorY - 2.5, zNear + 53)));
 		objectsBG.addChild(addStandAt(new Vector3d(xRight - 40, floorY + 2.5, zNear + 43), 2 * Math.PI));
-		objectsBG.addChild(addButtonAt(new Vector3d(xRight - 40.75, floorY + 8.5, zNear + 43), 0.22 * Math.PI));
+		objectsBG.addChild(addControlButtonAt(new Vector3d(xRight - 40.75, floorY + 8.5, zNear + 43), 0.22 * Math.PI, "trex-sound"));
 		objectsBG.addChild(addPanelAt(new Vector3d(xRight + 28, floorY + 5, zNear + 57), Math.PI / 2));
 
 		for (int i = 0; i < 5; i++) {
@@ -624,8 +653,10 @@ public class ProjectObjects {
 		objectsBG.addChild(addSpeakerAt(new Vector3d(xRight - 28, ceilingY, zFar - 48)));
 		objectsBG.addChild(addLightAt(new Vector3d(xRight - 28, ceilingY, zFar - 28)));
 
-		objectsBG.addChild(addSwitchAt(new Vector3d(xLeft - 1.25, floorY + 10, zNear + 13), Math.PI / 2));
-		objectsBG.addChild(addSwitchAt(new Vector3d(xLeft - 1.25, floorY + 10, zNear + 83), Math.PI / 2));
+		objectsBG.addChild(addSwitchAt(new Vector3d(xLeft - 1.25, floorY + 10, zNear + 13), Math.PI / 2, 1));
+		objectsBG.addChild(addIndicatorAt(new Vector3d(xLeft - 1.45, floorY + 10.70, zNear + 13), 1));
+		objectsBG.addChild(addSwitchAt(new Vector3d(xLeft - 1.25, floorY + 10, zNear + 83), Math.PI / 2, 2));
+		objectsBG.addChild(addIndicatorAt(new Vector3d(xLeft - 1.45, floorY + 10.70, zNear + 83), 2));
 
 		
 		 for (int i = 0; i < 10; i++) { 
