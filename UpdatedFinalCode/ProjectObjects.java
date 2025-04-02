@@ -852,10 +852,11 @@ public class ProjectObjects {
 	    // Add rotating head to robot
 	    robotModel.addChild(robotHeadRotationTG);
 	    
-	    removeNodeFromParent(allParts.get(20));
-	    removeNodeFromParent(allParts.get(3));
-	    removeNodeFromParent(allParts.get(16));
-	 
+	    // Remove original parts
+	    for(int i=0; i<allParts.size(); i++) {
+	    	removeNodeFromParent(allParts.get(i));
+	    }
+	    
 	    
 	    // Set appearance of robot's main body (color + interaction with scene lighting)
 	    Shape3D bodyMain[] = { (Shape3D) allParts.get(2).cloneNode(false),  (Shape3D) allParts.get(4).cloneNode(false), (Shape3D) allParts.get(6).cloneNode(false),  
@@ -868,27 +869,24 @@ public class ProjectObjects {
 	    // Set appearance each part
 	    for(int i=0; i<bodyMain.length; i++) {
 	    	bodyMain[i].setAppearance(bodyMainApp);	
-		    removeNodeFromParent(bodyMain[i]);
 		    robotModel.addChild(bodyMain[i]);
 	    }
-
-	     
+ 
+	    
 	    // Set appearance of robot's wires (color + interaction with scene lighting)
 	    Shape3D wires[] = { (Shape3D) allParts.get(5).cloneNode(false),  (Shape3D) allParts.get(7).cloneNode(false), (Shape3D) allParts.get(9).cloneNode(false),  
 	    					(Shape3D) allParts.get(12).cloneNode(false), (Shape3D) allParts.get(15).cloneNode(false), (Shape3D) allParts.get(25).cloneNode(false), 
 	    					(Shape3D) allParts.get(26).cloneNode(false), (Shape3D) allParts.get(27).cloneNode(false), (Shape3D) allParts.get(28).cloneNode(false), 
 	    					(Shape3D) allParts.get(29).cloneNode(false), (Shape3D) allParts.get(30).cloneNode(false)  };
 	    Appearance wiresApp = new Appearance();
-	    wiresApp.setMaterial(createLightingMaterial(new Color3f(0.2f, 0.2f, 0.2f), new Color3f(1f, 0.7f, 0f), new Color3f(1f, 1f, 1f), 120f));	// color and reflectivity of wires
+	    wiresApp.setMaterial(createLightingMaterial(new Color3f(0.2f, 0.2f, 0.2f), new Color3f(1f, 0.5f, 0f), new Color3f(1f, 1f, 1f), 120f));	// color and reflectivity of wires
 	    
 	    // Set appearance each wire
 	    for(int i=0; i<wires.length; i++) {
 	    	wires[i].setAppearance(wiresApp);
-		    removeNodeFromParent(wires[i]);
 		    robotModel.addChild(wires[i]);
 	    }
 
-	    
 	    
 	    // Set appearance of robot's (accented) interior body (color + interaction with scene lighting)
 	    Shape3D bodyAccents[] = { (Shape3D) allParts.get(1).cloneNode(false),  (Shape3D) allParts.get(14).cloneNode(false), (Shape3D) allParts.get(17).cloneNode(false), 
@@ -899,7 +897,6 @@ public class ProjectObjects {
 	    // Set appearance of each part
 	    for(int i=0; i<bodyAccents.length; i++) {
 	    	bodyAccents[i].setAppearance(bodyAccentsApp);
-		    removeNodeFromParent(bodyAccents[i]);
 		    robotModel.addChild(bodyAccents[i]);
 	    }
 	    
