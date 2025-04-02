@@ -303,7 +303,6 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
 	    		((Light) lightBG.getChild(i)).setEnable(!bool);	// toggle the ceiling lights  
     		}
     	}
-    	System.out.println();
     }
     
     
