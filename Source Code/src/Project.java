@@ -139,12 +139,12 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
                 Primitive.GENERATE_NORMALS | Primitive.GENERATE_TEXTURE_COORDS | Primitive.ENABLE_APPEARANCE_MODIFY, null);
 
         // Apply tiled textures to each face.
-        ((Shape3D) room.getShape(Box.FRONT)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageWall.jpg"));
-        ((Shape3D) room.getShape(Box.BACK)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageWall.jpg"));
-        ((Shape3D) room.getShape(Box.LEFT)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageWall.jpg"));
-        ((Shape3D) room.getShape(Box.RIGHT)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageWall.jpg"));
-        ((Shape3D) room.getShape(Box.TOP)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageCeiling.jpg"));
-        ((Shape3D) room.getShape(Box.BOTTOM)).setAppearance(createTiledTextureAppearance("ProjectFiles/ImageFloor.jpg"));
+        ((Shape3D) room.getShape(Box.FRONT)).setAppearance(createTiledTextureAppearance("ProjectFiles/images/ImageWall.jpg"));
+        ((Shape3D) room.getShape(Box.BACK)).setAppearance(createTiledTextureAppearance("ProjectFiles/images/ImageWall.jpg"));
+        ((Shape3D) room.getShape(Box.LEFT)).setAppearance(createTiledTextureAppearance("ProjectFiles/images/ImageWall.jpg"));
+        ((Shape3D) room.getShape(Box.RIGHT)).setAppearance(createTiledTextureAppearance("ProjectFiles/images/ImageWall.jpg"));
+        ((Shape3D) room.getShape(Box.TOP)).setAppearance(createTiledTextureAppearance("ProjectFiles/images/ImageCeiling.jpg"));
+        ((Shape3D) room.getShape(Box.BOTTOM)).setAppearance(createTiledTextureAppearance("ProjectFiles/images/ImageFloor.jpg"));
 
                 
         sceneBG.addChild(room);

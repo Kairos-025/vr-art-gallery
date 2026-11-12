@@ -17,7 +17,7 @@ public class ProjectSounds {
     public ProjectSounds() {
         // load MuseumSoundEffect.wav
         try {
-            File museumSoundFile = new File("sounds/MuseumSoundEffect.wav");
+            File museumSoundFile = new File("ProjectFiles/sounds/MuseumSoundEffect.wav");
             AudioInputStream museumSoundStream = AudioSystem.getAudioInputStream(museumSoundFile);
             museumSoundClip = AudioSystem.getClip();
             museumSoundClip.open(museumSoundStream);
@@ -29,7 +29,7 @@ public class ProjectSounds {
 
         // load footsteps.wav
         try {
-            File footstepsFile = new File("sounds/footsteps.wav");
+            File footstepsFile = new File("ProjectFiles/sounds/footsteps.wav");
             AudioInputStream footstepsStream = AudioSystem.getAudioInputStream(footstepsFile);
             footstepsClip = AudioSystem.getClip();
             footstepsClip.open(footstepsStream);
@@ -39,7 +39,7 @@ public class ProjectSounds {
 
         // load T-rex-roar.wav
         try {
-            File trexFile = new File("sounds/T-rex-roar.wav");
+            File trexFile = new File("ProjectFiles/sounds/T-rex-roar.wav");
             AudioInputStream trexStream = AudioSystem.getAudioInputStream(trexFile);
             trexClip = AudioSystem.getClip();
             trexClip.open(trexStream);
@@ -50,7 +50,7 @@ public class ProjectSounds {
         
         // load switchClick.wav
         try {
-            File switchClickFile = new File("sounds/switchClick.wav");
+            File switchClickFile = new File("ProjectFiles/sounds/switchClick.wav");
             AudioInputStream switchClickStream = AudioSystem.getAudioInputStream(switchClickFile);
             switchClickClip = AudioSystem.getClip();
             switchClickClip.open(switchClickStream);

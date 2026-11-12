@@ -80,30 +80,30 @@ public class ProjectImages {
         
         // Back wall images (z = -50) with flip=false.
         float centerZ1 = -49 + thickness / 2f;
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageMonalisa.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/images/ImageMonalisa.jpg",
                 imageWidth, imageHeight, thickness, 4, 64,
                 new Vector3f(-40f, 0f, centerZ1), noExtraRotation, false));
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageStarrynight.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/images/ImageStarrynight.jpg",
                 imageWidth, imageHeight, thickness, 4, 64,
                 new Vector3f(0f, 0f, centerZ1), noExtraRotation, false));
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageTsunami.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/images/ImageTsunami.jpg",
                 imageWidth, imageHeight, thickness, 4, 64,
                 new Vector3f(40f, 0f, centerZ1), noExtraRotation, false));
         
         
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageAbstract.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/images/ImageAbstract.jpg",
         		imageWidth, imageHeight, thickness, 4, 64,
         		new Vector3f(-99 + thickness / 2f, 0f, 0f), new Vector3f(0f, (float)Math.PI/2, 0f), false));
         
         // Front wall images (z = 50) with flip=true.
         float centerZ2 = 49 - thickness / 2f;
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageTwilight.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/images/ImageTwilight.jpg",
                 imageWidth, imageHeight, thickness, 4, 64,
                 new Vector3f(-40f, 0f, centerZ2), noExtraRotation, true));
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageShip.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/images/ImageShip.jpg",
                 imageWidth, imageHeight, thickness, 4, 64,
                 new Vector3f(0f, 0f, centerZ2), noExtraRotation, true));
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageFlowers.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/images/ImageFlowers.jpg",
                 imageWidth, imageHeight, thickness, 4, 64,
                 new Vector3f(40f, 0f, centerZ2), noExtraRotation, true));
         
