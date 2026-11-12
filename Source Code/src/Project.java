@@ -1,5 +1,3 @@
-package CodesEJ2800;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GraphicsConfiguration;
@@ -309,7 +307,6 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
 	    		((Light) lightBG.getChild(i)).setEnable(!bool);	// toggle the ceiling lights  
     		}
     	}
-    	System.out.println();
     }
     
     
