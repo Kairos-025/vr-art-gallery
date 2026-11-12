@@ -1,3 +1,5 @@
+package CodesEJ2800;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GraphicsConfiguration;
@@ -62,6 +64,10 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         {-77.5, -73.0, 17.0, 23.0},       // left side of portrait control panel
         {65.0, 94.0, -21.0, 11.3},        // dinosaur
         {55.7, 60.0, -8.0, -2.2},         // dinosaur control panel
+        {62.0, 74.0, 41.0, 48.0},         // video1 panel
+        {62.0, 74.0, -48.0, -41.0},       // video2 panel
+        {-74.0, -62.0, 41.0, 48.0},       // video3 panel
+        {-74.0, -62.0, -48.0, -41.0},     // video4 panel
         {66.0, 75.0, 13.5, 25.5}		  // robot
     };
     
@@ -74,7 +80,7 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
     
     
     // --- SOUND ---
-    private SoundPlayer soundPlayer;
+    private ProjectSounds projectSounds;
     
     // --- View --- 
     private Transform3D defaultViewTransform = new Transform3D();
@@ -146,6 +152,7 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         sceneBG.addChild(room);
         sceneBG.addChild(ProjectImages.addGalleryImages());
         sceneBG.addChild(ProjectObjects.addObjects());
+        sceneBG.addChild(new ProjectVideos().createVideoScreens());
 
         // Note: Do not compile sceneBG here if you plan to add more children later.
         sceneBG.compile();
@@ -276,8 +283,8 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         sceneBG.addChild(lightBG);        
         
         // adding SOUND
-        soundPlayer = new SoundPlayer();
-        soundPlayer.playMuseumSound();
+        projectSounds = new ProjectSounds();
+        projectSounds.playMuseumSound();
         
         movementTimer = new Timer(30, new ActionListener() {
             @Override
@@ -302,6 +309,7 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
 	    		((Light) lightBG.getChild(i)).setEnable(!bool);	// toggle the ceiling lights  
     		}
     	}
+    	System.out.println();
     }
     
     
@@ -376,9 +384,9 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
 
         // control footstep sounds based on movement
         if (isMoving) {
-            soundPlayer.startFootsteps();
+            projectSounds.startFootsteps();
         } else {
-            soundPlayer.stopFootsteps();
+            projectSounds.stopFootsteps();
         }
 
         // skip movement calculations if no keys are pressed
@@ -584,32 +592,32 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
                 if (controlType.equals("man-rotation") && ProjectObjects.manRotationTG != null) {
                     RotationInterpolator rotator = (RotationInterpolator) ProjectObjects.manRotationTG.getUserData();
                     ProjectAnimations.toggleAlpha(rotator.getAlpha());
-                    soundPlayer.playSwitchClick();
+                    projectSounds.playSwitchClick();
                 } 
                 // Toggle levitation of man statue
                 else if (controlType.equals("man-levitation") && ProjectObjects.manLevitationTG != null) {
                     ProjectAnimations.Levitation levitator = (ProjectAnimations.Levitation) ProjectObjects.manLevitationTG.getUserData();
                     levitator.togglePause();
-                    soundPlayer.playSwitchClick();
+                    projectSounds.playSwitchClick();
                 } 
                 
                 // Toggle rotation of woman statue
                 else if (controlType.equals("woman-rotation") && ProjectObjects.womanRotationTG != null) {
                 	RotationInterpolator rotator = (RotationInterpolator) ProjectObjects.womanRotationTG.getUserData();
                     ProjectAnimations.toggleAlpha(rotator.getAlpha());
-                    soundPlayer.playSwitchClick();
+                    projectSounds.playSwitchClick();
                 }
                 // Toggle levitation of woman statue
                 else if (controlType.equals("woman-levitation") && ProjectObjects.womanLevitationTG != null) {
                 	ProjectAnimations.Levitation levitator = (ProjectAnimations.Levitation) ProjectObjects.womanLevitationTG.getUserData();
                     levitator.togglePause();
-                    soundPlayer.playSwitchClick();
+                    projectSounds.playSwitchClick();
                 }
                 
                 // Play the T-rex sound.
                 else if (controlType.equals("trex-sound")) {
-                	soundPlayer.playSwitchClick();
-                	soundPlayer.playTrexRoar();
+                	projectSounds.playSwitchClick();
+                	projectSounds.playTrexRoar();
                 }
                 
                 return;
@@ -636,7 +644,7 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
                 rotation180.rotZ(Math.PI);					// Create a 180° rotation about Y.
                 currentTransform.mul(rotation180);			// Multiply the current transform by the new rotation.
                 switchTG.setTransform(currentTransform);	// Update the current transform
-                soundPlayer.playSwitchClick();				// Play switchClick sound effect
+                projectSounds.playSwitchClick();				// Play switchClick sound effect
                 
                 // First switch: toggle colorful lights and update switch's indicator.
                 if (switchTG == ProjectObjects.switch1TG) {
@@ -646,7 +654,7 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
                 
                 // Second switch: toggle background music and update switch's indicator.
                 else if (switchTG == ProjectObjects.switch2TG) {
-                	soundPlayer.toggleMuseumSound();
+                	projectSounds.toggleMuseumSound();
                     updateIndicatorColor(ProjectObjects.indicator2TG, newIndClr);
                 }
                 return;
@@ -760,8 +768,8 @@ public class Project extends JPanel implements MouseListener, MouseMotionListene
         int dx = currentX - lastMouseX;
         int dy = currentY - lastMouseY;
         
-        yawAngle -= dx * mouseSensitivity;		
-        pitchAngle -= dy * mouseSensitivity;	
+        yawAngle += dx * mouseSensitivity;		
+        pitchAngle += dy * mouseSensitivity;	
         double maxPitch = Math.toRadians(45);
         if (pitchAngle > maxPitch) pitchAngle = maxPitch;
         if (pitchAngle < -maxPitch) pitchAngle = -maxPitch;
