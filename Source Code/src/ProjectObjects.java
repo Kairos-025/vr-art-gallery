@@ -422,7 +422,7 @@ public class ProjectObjects {
 	    
 	    // Make object interact with scene lighting (by giving it a material)	    
 	    Material materialLighting = createLightingMaterial(new Color3f(0.05f, 0.05f, 0.05f),new Color3f(0.9f, 0.9f, 0.85f), new Color3f(0.075f, 0.075f, 0.075f), 10f);
-	    Appearance womanAppearance = createAppearance("woman_ao");
+	    Appearance womanAppearance = createAppearance("woman_woman");
 	    womanAppearance.setMaterial(materialLighting);
 	    applyAppearance(womanModel, womanAppearance);
 
@@ -473,7 +473,7 @@ public class ProjectObjects {
 	    
 		// Make object interact with scene lighting (by giving it a material)	
 	    Material materialLighting = createLightingMaterial(new Color3f(0.05f, 0.05f, 0.05f),new Color3f(0.9f, 0.9f, 0.75f), new Color3f(0.075f, 0.075f, 0.075f), 10f);
-	    Appearance manAppearance = createAppearance("man_ao");
+	    Appearance manAppearance = createAppearance("man_man");
 	    manAppearance.setMaterial(materialLighting);
 	    applyAppearance(manModel, manAppearance);
 

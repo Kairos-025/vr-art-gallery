@@ -80,10 +80,10 @@ public class ProjectImages {
         
         // Back wall images (z = -50) with flip=false.
         float centerZ1 = -49 + thickness / 2f;
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageMonaLisa.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageMonalisa.jpg",
                 imageWidth, imageHeight, thickness, 4, 64,
                 new Vector3f(-40f, 0f, centerZ1), noExtraRotation, false));
-        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageStarryNight.jpg",
+        galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageStarrynight.jpg",
                 imageWidth, imageHeight, thickness, 4, 64,
                 new Vector3f(0f, 0f, centerZ1), noExtraRotation, false));
         galleryBG.addChild(ProjectAnimations.createMorphImageBlock("ProjectFiles/ImageTsunami.jpg",
