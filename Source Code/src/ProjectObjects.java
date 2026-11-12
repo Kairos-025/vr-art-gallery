@@ -780,7 +780,7 @@ public class ProjectObjects {
 		
 		// Make object interact with scene lighting (by giving it a material)	
 	    Material materialLighting = createLightingMaterial(new Color3f(0.1f, 0.1f, 0.1f), new Color3f(0.3f, 0.31f, 0.32f), new Color3f(0.1f, 0.1f, 0.1f), 70f);
-	    Appearance panelAppearance = createAppearance("panel");
+	    Appearance panelAppearance = createAppearance("stand");
 	    panelAppearance.setMaterial(materialLighting);
 	    applyAppearance(panelModel, panelAppearance);
 	    
@@ -788,7 +788,7 @@ public class ProjectObjects {
 	    Transform3D translate = new Transform3D();
 	    Transform3D rotate = new Transform3D();
 		Transform3D scale = new Transform3D();
-		scale.setScale(40f);
+		scale.setScale(10f);
 		rotate.rotY(rotationAngle);
 		scale.mul(rotate);
 		translate.setTranslation(pos);
@@ -1023,6 +1023,12 @@ public class ProjectObjects {
 		objectsBG.addChild(addLightAt(new Vector3d(xRight - 38, ceilingY, zFar - 25.5)));
 		
 		
+		// Add panels behind the four video screens
+		objectsBG.addChild(addPanelAt(new Vector3d(xLeft + 30, floorY + 5, zNear + 2.5), Math.PI));
+		objectsBG.addChild(addPanelAt(new Vector3d(xLeft + 30, floorY + 5, zFar - 2.5), 2 * Math.PI));
+		objectsBG.addChild(addPanelAt(new Vector3d(xRight - 30, floorY + 5, zNear + 2.5), Math.PI));
+		objectsBG.addChild(addPanelAt(new Vector3d(xRight - 30, floorY + 5, zFar - 2.5), 2 * Math.PI));
+
 		// Add wall switches and indicators (for colorful/white lights and background music)
 		objectsBG.addChild(addSwitchAt(new Vector3d(xLeft - 1.25, floorY + 10, zNear + 13), Math.PI / 2, 1));	// Switch 1 - Colorful lights
 		objectsBG.addChild(addSwitchAt(new Vector3d(xLeft - 1.25, floorY + 10, zNear + 83), Math.PI / 2, 2));	// Switch 2 - Background music
