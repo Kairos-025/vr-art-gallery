@@ -1,5 +1,3 @@
-package Project;
-
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
@@ -12,13 +10,14 @@ public class ProjectSounds {
     private Clip museumSoundClip; // clip for MuseumSoundEffect.wav
     private Clip footstepsClip;   // clip for footsteps.wav
     private Clip trexClip;        // clip for T-rex-roar.wav
-
+    private Clip switchClickClip; // clip for switchClick.wav
+    
     boolean isPlayingBack = false;
     
     public ProjectSounds() {
         // load MuseumSoundEffect.wav
         try {
-            File museumSoundFile = new File("ProjectFiles/sounds/MuseumSoundEffect.wav");
+            File museumSoundFile = new File("sounds/MuseumSoundEffect.wav");
             AudioInputStream museumSoundStream = AudioSystem.getAudioInputStream(museumSoundFile);
             museumSoundClip = AudioSystem.getClip();
             museumSoundClip.open(museumSoundStream);
@@ -30,7 +29,7 @@ public class ProjectSounds {
 
         // load footsteps.wav
         try {
-            File footstepsFile = new File("ProjectFiles/sounds/footsteps.wav");
+            File footstepsFile = new File("sounds/footsteps.wav");
             AudioInputStream footstepsStream = AudioSystem.getAudioInputStream(footstepsFile);
             footstepsClip = AudioSystem.getClip();
             footstepsClip.open(footstepsStream);
@@ -40,7 +39,7 @@ public class ProjectSounds {
 
         // load T-rex-roar.wav
         try {
-            File trexFile = new File("ProjectFiles/sounds/T-rex-roar.wav");
+            File trexFile = new File("sounds/T-rex-roar.wav");
             AudioInputStream trexStream = AudioSystem.getAudioInputStream(trexFile);
             trexClip = AudioSystem.getClip();
             trexClip.open(trexStream);
@@ -48,6 +47,19 @@ public class ProjectSounds {
             e.printStackTrace();
             trexClip = null;
         }
+        
+        // load switchClick.wav
+        try {
+            File switchClickFile = new File("sounds/switchClick.wav");
+            AudioInputStream switchClickStream = AudioSystem.getAudioInputStream(switchClickFile);
+            switchClickClip = AudioSystem.getClip();
+            switchClickClip.open(switchClickStream);
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+            switchClickClip = null;
+        }
+        
+        
     }
 
     public void pauseMuseumSound() {
@@ -63,6 +75,19 @@ public class ProjectSounds {
             isPlayingBack = true;
         }
     }
+    
+    
+    public void toggleMuseumSound()
+    {
+    	if(museumSoundClip.isRunning()) {
+    		pauseMuseumSound();
+    	}
+    	else {
+    		playMuseumSound();
+    	}
+    	
+    }
+    
     
     public boolean isPlaying() {
         return isPlayingBack;
@@ -124,5 +149,33 @@ public class ProjectSounds {
             }).start();
         }
     }
+    
+    
+    // play the switch click sound
+    public void playSwitchClick() {
+        if (switchClickClip != null) {
+            // If already playing, stop to restart the sound.
+            if (switchClickClip.isRunning()) {
+            	switchClickClip.stop();
+            }
+        	switchClickClip.setFramePosition(5980); // Rewind to beginning of used sound
+        	switchClickClip.start();				// (desired beginning not at index 0)
+        	
+        	
+            // Create a Swing Timer to stop playback after 250 milliseconds (0.25 seconds)
+            int delay = 250; // delay in milliseconds
+            new Timer(delay, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                	switchClickClip.stop();
+                    ((Timer)e.getSource()).stop(); // ensure the timer only runs once
+                }
+            }).start();
+        	
+        	
+        }
+    }
+    
+    
 }
 
